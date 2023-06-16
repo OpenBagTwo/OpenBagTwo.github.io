@@ -1,7 +1,7 @@
 /.idea
 /node_modules
-/exampleSite/public
-/exampleSite/hugo_stats.json
+public
+hugo_stats.json
 .DS_Store
 resources
 .hugo_build.lock
