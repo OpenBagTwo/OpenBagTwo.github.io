@@ -102,6 +102,42 @@ openbagtwo@elementary-dev $ logout
 $ ./build/Application
 ```
 
+## Granite and meson
+
+So far my application has just been a bog-standard GTK4 app, but the whole point of this exercise was to build something
+for _elementary._ Some of the high-level concepts are covered [here](https://docs.elementary.io/develop/writing-apps/our-first-app/the-build-system)
+but at this point I was better served by just copying and modifying `meson.build` files from
+[a template project](https://github.com/elementary/calculator).
+
+The big thing was switching over to using [GObject-style construction](https://docs.elementary.io/develop/writing-apps/code-style/class-construction)
+so the top of my program now looks like:
+
+```vala
+public class EnderChest.Application : Gtk.Application {
+    construct {
+        application_id = "com.github.openbagtwo.babys-first-vala";
+        flags = ApplicationFlags.FLAGS_NONE;
+    }
+...
+```
+
+I also copied over their [startup() method](https://github.com/elementary/calculator/blob/98085d8774aa4b4f10a2f3f6d5f67386d7838ae0/src/Application.vala#L32-L57)
+which sets the application styling and registers Ctrl-Q as a keyboard shortcut to quit.
+
+With those changes made and files in place, I hopped back into my distrobox container and ran:
+
+```
+$ cd /path/to/workspace/vala-project
+$ distrobox enter elementary-dev
+openbagtwo@elementary-dev $ meson build --prefix=/usr
+openbagtwo@elementary-dev $ cd build
+openbagtwo@elementary-dev $ ninja
+openbagtwo@elementary-dev $ logout
+$ ./build/src/com.github.openbagtwo.enderchest-gui
+```
+
+which looks the same as before, but now closes with Ctrl-Q.
+
 ## Next Steps
 
 The project I'm working towards is a frontend for [EnderChest](https://openbagtwo.github.io/EnderChest)
