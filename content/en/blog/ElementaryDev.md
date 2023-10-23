@@ -102,7 +102,7 @@ openbagtwo@elementary-dev $ logout
 $ ./build/Application
 ```
 
-## Granite and meson
+## Granite and Meson
 
 So far my application has just been a bog-standard GTK4 app, but the whole point of this exercise was to build something
 for _elementary._ Some of the high-level concepts are covered [here](https://docs.elementary.io/develop/writing-apps/our-first-app/the-build-system)
@@ -126,7 +126,7 @@ which sets the application styling and registers Ctrl-Q as a keyboard shortcut t
 
 With those changes made and files in place, I hopped back into my distrobox container and ran:
 
-```
+```bash
 $ cd /path/to/workspace/vala-project
 $ distrobox enter elementary-dev
 openbagtwo@elementary-dev $ meson build --prefix=/usr
@@ -137,6 +137,27 @@ $ ./build/src/com.github.openbagtwo.enderchest-gui
 ```
 
 which looks the same as before, but now closes with Ctrl-Q.
+
+## Playing Around with Granite
+
+Finally, to get a good sense of the widgets at my disposal, I cloned [the Granite library itself](https://github.com/elementary/granite)
+so I could build and run their granite demo:
+
+```bash
+$ cd /path/to/workspace/granite
+$ distrobox enter elementary-dev
+openbagtwo@elementary-dev $ sudo apt install sassc
+openbagtwo@elementary-dev $ meson build --preix=/usr
+openbagtwo@elementary-dev $ cd build
+openbagtwo@elementary-dev $ ninja
+openbagtwo@elementary-dev $ logout
+$ ./build/demo/granite-7-demo
+```
+
+![example of an elementary-style toast notification](/friendly-toast.png)
+
+So cool! This is going to be so much fun to play around with.
+
 
 ## Next Steps
 
