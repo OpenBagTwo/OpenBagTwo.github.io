@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Gilad Barlev" />
+  <meta name="dcterms.date" content="2024-08-12" />
+  <title>Schelling Segregation Revisited</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    div.abstract {
+      margin: 2em 2em 2em 2em;
+      text-align: left;
+      font-size: 85%;
+    }
+    div.abstract-title {
+      font-weight: bold;
+      text-align: center;
+      padding: 0;
+      margin-bottom: 0.5em;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Schelling Segregation Revisited</h1>
+<p class="author">Gilad Barlev</p>
+<p class="date">2024-08-12</p>
+<div class="abstract">
+<div class="abstract-title">Abstract</div>
+<p>Building on T.C. Schelling’s 1971 model of “individually motivated"
+racial segregation, we explore the conditions under which segregated
+domains coexist with integrated domains in the same system. We employ a
+simple agent-based model on a 2D lattice where each agent has some
+preference to be near other agents of like type, but which allows for
+random movements as well. In attempting to produce the desired results,
+we consider two variants: systems in which the randomness of movement
+varies from agent-to-agent, and systems in which an external potential
+is imposed on the lattice. While the first variant does not lead to the
+desired behavior, the second does, and we explore the effects of several
+several different potentials on the long-time segregation of the
+system.</p>
+</div>
+</header>
+<h1 id="sec:introduction">Introduction</h1>
+<p>In 1971, T.C. Shelling introduced several dynamic models of racial
+segregation, showing how even the slightest preference of individuals to
+be near other individuals of like type could produce large-scale
+segregation, even in the absence of economic, legal or other global
+concerns. In each model, individuals of different “racial" would be
+placed on a lattice, and each individual would be classified as “happy"
+or “unhappy" based on the “racial" makeup of those around them (e.g.
+“happy" if 50% or more of its neighbors were of like-type). If an
+individual were “unhappy," it would move to a different site on the
+lattice. Schelling’s result was that, even if each individual had very
+little racial preference, segregated domains would form on the
+lattice<span class="citation" data-cites="Schelling"></span>. Decades
+later, physicists discovering the paper recognized its similarity to an
+Ising system and consequently suggested improvements<span
+class="citation" data-cites="Applications"></span>. Noting that
+Schelling’s original model created segregation only on a local level and
+did not lead to the formation of large-scale segregated domains (a
+disparity that was first noticed and remedied by Jones in 1985<span
+class="citation" data-cites="Jones"></span>), Stauffer &amp; Solomon
+devised an equivalent <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T%3D0"
+alt="T=0" title="T=0" class="math inline" /> Ising-like system,
+reproducing Schelling’s original results. By “increasing the
+temperature" (that is, increasing the probability of non-ideal moves),
+large domains were produced. Of course, if temperature were increased
+beyond some critical temperature <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T_c" alt="T_c"
+title="T_c" class="math inline" />, the result would be complete
+integration<span class="citation"
+data-cites="IsingImprovements"></span>. Stauffer &amp; Solomon
+interpreted this temperature as a measure of racial tolerance, and while
+this might make sense in explaining the phase transition between
+segregation and integration, this interpretation doesn’t really make
+sense in explaining the behavior at <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T%3D0"
+alt="T=0" title="T=0" class="math inline" />. Superficial similarities
+have also been noted between urban segregation and metal mixtures in
+binary alloys<span class="citation" data-cites="Alloy"></span>.</p>
+<p>Up until this point, however, no attempts have been made to explain
+the phenomenon of integration and segregation existing side-by-side.
+Consider Fig. <a href="#fig:MoCo" data-reference-type="ref"
+data-reference="fig:MoCo">1</a>, a map of the distribution of
+ethnicities in Montgomery County, MD, specifically, Downtown Silver
+Spring and the surrounding areas. While there is a sharp ethnic divide
+on the East-West line to the south of Downtown Silver Spring, Downtown
+Silver Spring itself is heavily integrated. While it is, of course,
+entirely conceivable that the reason for this phenomenon could be
+economic (due to, say, differing property costs) or historical, this
+paper seeks to explore, in the words of Schelling, “individually
+motivated" reasons for this phenomenon, that is, a model to account for
+this phenomenon that can be accounted for exclusively by the
+decision-making processes of individuals.</p>
+<figure id="fig:MoCo">
+<img src="montgomery_county.png" />
+<figcaption><span id="fig:MoCo" label="fig:MoCo"></span>Ethnicity map of
+Montgomery County, MD taken from 2000 US Census data. Each dot
+represents 25 individuals. Red represents Caucasian, Blue represents
+African American, Green Asian, Orange Hispanic, and Gray other. Taken
+from
+http://www.justupthepike.com/2010/09/mapping-racial-ethnic-integration-in.html.<span
+class="citation" data-cites="JUTP"></span><span class="citation"
+data-cites="Maps"></span></figcaption>
+</figure>
+<h1 id="sec:basic">The Basic Model</h1>
+<p>Our starting point for these investigations is based on the basic
+Schelling model at positive <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T" alt="T"
+title="T" class="math inline" />, as outlined by Stauffer &amp;
+Solomon<span class="citation" data-cites="IsingImprovements"></span>.
+First, we create a 2D (<img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20L%5Ctimes%20L"
+alt="L\times L" title="L\times L" class="math inline" />) lattice and
+completely fill it with agents of random race. We chose to consider the
+case of three races (red, green and blue) at equal proportions. Then, we
+delete exactly one site to create a vacancy. An agent <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20i" alt="i"
+title="i" class="math inline" /> of race <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20R_i" alt="R_i"
+title="R_i" class="math inline" /> is then chosen at random. We proceed
+to compute its “energy" both at its current site and at the vacancy:
+<img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Cdisplaystyle%20%5Clabel%7Beqn%3Aenergy%7DE%5Ei%28x%29%3D%5Csum_%7Bj%3A%20dist%28x%2Cj%29%5Cleq%20r%7DE_%7BR_iR_j%7D"
+alt="\label{eqn:energy}E^i(x)=\sum_{j: dist(x,j)\leq r}E_{R_iR_j}"
+title="\label{eqn:energy}E^i(x)=\sum_{j: dist(x,j)\leq r}E_{R_iR_j}"
+class="math display" /> that is, by considering the interactions with
+all agents within some distance <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20r" alt="r"
+title="r" class="math inline" /> of the site <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20x" alt="x"
+title="x" class="math inline" />.</p>
+<p>While the matrix <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20%5Ctilde%20E"
+alt="\tilde E" title="\tilde E" class="math inline" /> representing
+these interactions could be random, we chose to begin by exploring the
+simplest case: <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Cdisplaystyle%20%5Ctilde%20E%20%3D%20%5Cleft%28%20%5Cbegin%7Barray%7D%7Bccc%7D%0A-1%20%26%200.5%20%26%200.5%20%5C%5C%0A0.5%20%26%20-1%20%26%200.5%20%5C%5C%0A0.5%20%26%200.5%20%26%20-1%5Cend%7Barray%7D%5Cright%29"
+alt="\tilde E = \left( \begin{array}{ccc}
+-1 &amp; 0.5 &amp; 0.5 \\
+0.5 &amp; -1 &amp; 0.5 \\
+0.5 &amp; 0.5 &amp; -1\end{array}\right)"
+title="\tilde E = \left( \begin{array}{ccc}
+-1 &amp; 0.5 &amp; 0.5 \\
+0.5 &amp; -1 &amp; 0.5 \\
+0.5 &amp; 0.5 &amp; -1\end{array}\right)" class="math display" /> That
+is, agents of like race are “attracted" while agents of differing races
+are “repelled."</p>
+<p>The individual <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20i" alt="i"
+title="i" class="math inline" /> will then move to the new site if the
+energy difference <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20%5CDelta%20E%5Ei"
+alt="\Delta E^i" title="\Delta E^i" class="math inline" /> between the
+vacancy and its current site is less than zero or otherwise with a
+probability <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Cdisplaystyle%20%5Clabel%7Beqn%3Amove%7DP_%7B%5Ctext%7Bmove%7D%7D%3D%5Cexp%5Cleft%5B-%5Cdfrac%7B%5CDelta%20E%5Ei%7D%7BT%7D%5Cright%5D"
+alt="\label{eqn:move}P_{\text{move}}=\exp\left[-\dfrac{\Delta E^i}{T}\right]"
+title="\label{eqn:move}P_{\text{move}}=\exp\left[-\dfrac{\Delta E^i}{T}\right]"
+class="math display" /> where <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T" alt="T"
+title="T" class="math inline" /> describes a “temperature" of the system
+(see Section <a href="#subsec:T" data-reference-type="ref"
+data-reference="subsec:T">2.1</a> for an interpretation of this
+value).</p>
+<p>If the agent moves, it will proceed to occupy the vacancy, and its
+old location will become a new vacancy. If the agent does not move,
+another agent is selected at random. This simulates the perfect
+“seller’s market"–only one vacancy is ever available to be moved into at
+any given time, each agent has only two choices (move to that vacancy or
+stay where it is), and the only way for the system to advance is for
+someone to move to the vacancy.</p>
+<p>To correct for certain artifacts in this method, each time a new
+agent needs to be selected, there is a probability <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20P_%7BOOT%7D"
+alt="P_{OOT}" title="P_{OOT}" class="math inline" /> that we fill the
+vacancy with a new, random individual (an “out-of-towner"). In that
+case, another agent is selected at random to “move out of town" and
+create a new vacancy.</p>
+<figure id="fig:basic">
+<p><img src="basic-0.png" alt="image" /> <img src="basic-5.png"
+alt="image" /> <img src="basic-15.png" alt="image" /></p>
+<figcaption><span id="fig:basic" label="fig:basic"></span>Long-time race
+distributions for a simulated <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20200%5Ctimes%20200"
+alt="200\times 200" title="200\times 200" class="math inline" />-site
+(<img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20L%3D200"
+alt="L=200" title="L=200" class="math inline" />) city with three races
+of approximately equal proportions. (a) At <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T%3D0"
+alt="T=0" title="T=0" class="math inline" /> we see short-range
+segregation, but no large-scale domains form. (b) At <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T%3D5"
+alt="T=5" title="T=5" class="math inline" /> large-scale segregation
+occurs. The picture shows the result of <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%201500L%5E2"
+alt="1500L^2" title="1500L^2" class="math inline" /> moves. (c) <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T%3D15"
+alt="T=15" title="T=15" class="math inline" /> would appear to be above
+the critical temperature, leading to an integrated steady-state. <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20P_%7BOOT%7D%20%3D%200"
+alt="P_{OOT} = 0" title="P_{OOT} = 0" class="math inline" /> for (a) and
+<img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%200.01"
+alt="0.01" title="0.01" class="math inline" /> for (b) and (c). The
+neighborhood size was set to <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20r%3D3"
+alt="r=3" title="r=3" class="math inline" />. The results shown for (b)
+and (c) represent the culmination of <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%201500L%5E2"
+alt="1500L^2" title="1500L^2" class="math inline" /> moves. For (a),
+only <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%201.6L%5E2"
+alt="1.6L^2" title="1.6L^2" class="math inline" /> moves were performed,
+at which time the system ran out of viable moves.</figcaption>
+</figure>
+<p>As shown in Fig. <a href="#fig:basic" data-reference-type="ref"
+data-reference="fig:basic">2</a>, at <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T%3D0"
+alt="T=0" title="T=0" class="math inline" /> (and <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20P_%7BOOT%7D%3D0"
+alt="P_{OOT}=0" title="P_{OOT}=0" class="math inline" />), Schelling’s
+original results are reproduced. At <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%200%3CT%3CT_c"
+alt="0&lt;T&lt;T_c" title="0&lt;T&lt;T_c" class="math inline" />,
+large-scale segregated domains form, while above <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T_c" alt="T_c"
+title="T_c" class="math inline" />, integration dominates, agreeing with
+the findings of Stauffer &amp; Solomon.</p>
+<h2 id="subsec:T">Interpretation of T</h2>
+<p>Stauffer &amp; Solomon and others interpreted the temperature <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T" alt="T"
+title="T" class="math inline" /> as a measure of the “tolerance" of
+individuals in the system, but let’s consider what changing <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T" alt="T"
+title="T" class="math inline" /> actually does–as <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T" alt="T"
+title="T" class="math inline" /> increases, agents in the system are
+more likely to move, even if it would lead them to be ethnically less
+“content." If these were real people, we could interpret this as meaning
+that these moves were performed for reasons besides ethnic similarity.
+In the real world, very few individuals move to a new home based solely
+on the ethnic makeup of their neighbors. In fact, according to the 2000
+US Census, the number 2 reason for moving (behind “family reasons") was
+due to a new job or transfer. If someone were moving to be closer to
+work, they might be more likely to discount the ethnic similarity of
+their neighbors. So perhaps that can be our interpretation of <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T" alt="T"
+title="T" class="math inline" />– that societies (or individuals, as we
+will explore in the next section) that are more career-oriented may be
+modeled as having higher temperature.</p>
+<h1 id="sec:two-T">Two-temperature System</h1>
+<p>To attempt to create a system containing both integrated and
+segregated neighborhoods, we will begin by creating two classes of
+agents, each composed of equal proportions of our three races, but with
+class having a different temperature <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T" alt="T"
+title="T" class="math inline" />. So now each individual has not only a
+race <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20R_i" alt="R_i"
+title="R_i" class="math inline" /> but a temperature <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T_i" alt="T_i"
+title="T_i" class="math inline" />. Besides that, we made no changes to
+the model. Having set the temperature for one group well below <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T_c" alt="T_c"
+title="T_c" class="math inline" /> and that for the other above, the
+result is shown in Fig. <a href="#fig:2class" data-reference-type="ref"
+data-reference="fig:2class">3</a>, and is not what we would have hoped
+for. Rather than segregated neighborhoods coexisting with integrated
+ones, what we see is segregated neighborhoods with low-<img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T" alt="T"
+title="T" class="math inline" /> cores and high-<img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T" alt="T"
+title="T" class="math inline" /> edges. This makes some intuitive sense,
+as high-T individuals are more willing to move into the “less desirable"
+locations on the borders between neighborhoods.</p>
+<figure id="fig:2class">
+<p><img src="2class.png" alt="image" /> <img src="2class-wealth.png"
+alt="image" /></p>
+<figcaption><span id="fig:2class" label="fig:2class"></span>Long-time
+race (left) and temperature (right) distributions for a simulated <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20200%5Ctimes%20200"
+alt="200\times 200" title="200\times 200" class="math inline" />-site
+(<img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20L%3D200"
+alt="L=200" title="L=200" class="math inline" />) city with three races
+and two temperature classes of approximately equal proportions. The
+temperatures of the two classes were <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T%3D1"
+alt="T=1" title="T=1" class="math inline" /> (grey) and <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T%27%3D15"
+alt="T&#39;=15" title="T&#39;=15" class="math inline" /> (black) (<img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20P_%7BOOT%7D%20%3D%200.01"
+alt="P_{OOT} = 0.01" title="P_{OOT} = 0.01" class="math inline" />, <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20r%3D3"
+alt="r=3" title="r=3" class="math inline" />). Rather than resulting in
+integrated and segregated domains, the system we observe shows
+segregated domains with mostly low-<img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T" alt="T"
+title="T" class="math inline" /> individuals at the cores and high-<img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T" alt="T"
+title="T" class="math inline" /> individuals on the edges. The
+distributions shown are the result of <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%201500L%5E2"
+alt="1500L^2" title="1500L^2" class="math inline" /> moves.</figcaption>
+</figure>
+<h1 id="sec:potential">External Potential</h1>
+<p>In trying to come up with alternate methods of creating coexisting
+integrated and segregated neighborhoods, we considered our real-world
+example: Downtown Silver Spring. What if the locale itself were
+responsible for the integration? Specifically, what if the presence of
+an attraction, something that individuals of all races wanted to be near
+(be it a shopping center, a transportation hub, a job locus, or, as in
+the case of DTSS, a combination of all of the above), was enough to
+override the innate preference towards segregation? To investigate this,
+our next round of simulations included the presence of an external
+potential overlaid on the lattice of the following form: <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Cdisplaystyle%20%5Clabel%7Beqn%3Apotential%7DV%28x%29%3D%5Cleft%5Bdist%28x%2Ca%29%5Cright%5D%5E1"
+alt="\label{eqn:potential}V(x)=\left[dist(x,a)\right]^1"
+title="\label{eqn:potential}V(x)=\left[dist(x,a)\right]^1"
+class="math display" /> where <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20a" alt="a"
+title="a" class="math inline" /> is the coordinate of the attraction.
+The exponent of <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%201" alt="1"
+title="1" class="math inline" /> was chosen based on the idea of
+commuting: if someone needs to commute to point <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20a" alt="a"
+title="a" class="math inline" />, shaving <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%2010" alt="10"
+title="10" class="math inline" /> minutes off the commute is going to be
+just as important if it means shortening the commute from <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%2020" alt="20"
+title="20" class="math inline" /> minutes to <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%2010" alt="10"
+title="10" class="math inline" /> as from <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%2050" alt="50"
+title="50" class="math inline" /> minutes to <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%2040" alt="40"
+title="40" class="math inline" />. No cutoff distance was chosen for the
+potential–the idea is that all agents on the lattice, no matter how far
+out, need to commute to this attraction.</p>
+<p>With this potential in mind, we make one small modification to our
+model, replacing Eqn. <a href="#eqn:energy" data-reference-type="ref"
+data-reference="eqn:energy">[eqn:energy]</a> with the following: <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Cdisplaystyle%20%5Clabel%7Beqn%3Aenergy%7DE%5Ei%28x%29%3DW_iV%28x%29%2B%5Csum_%7Bj%3A%20dist%28x%2Cj%29%5Cleq%20r%7DE_%7BR_iR_j%7D"
+alt="\label{eqn:energy}E^i(x)=W_iV(x)+\sum_{j: dist(x,j)\leq r}E_{R_iR_j}"
+title="\label{eqn:energy}E^i(x)=W_iV(x)+\sum_{j: dist(x,j)\leq r}E_{R_iR_j}"
+class="math display" /> where <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20W_i" alt="W_i"
+title="W_i" class="math inline" /> is a weighting term that describes
+just how important it is for the agent <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20i" alt="i"
+title="i" class="math inline" /> to be near the attraction.</p>
+<figure id="fig:1attract">
+<p><img src="1attract.png" alt="image" /> <img src="1attract-V.png"
+alt="image" /></p>
+<figcaption><span id="fig:1attract"
+label="fig:1attract"></span>Long-time race distribution (left) for a
+simulated <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20100%5Ctimes%20100"
+alt="100\times 100" title="100\times 100" class="math inline" />-site
+(<img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20L%3D100"
+alt="L=100" title="L=100" class="math inline" />) city with three races
+and a site in the center imposing an attractive <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20r%5E1"
+alt="r^1" title="r^1" class="math inline" /> potential (right) (darker
+color, higher potential). The same temperature (<img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T%3D5"
+alt="T=5" title="T=5" class="math inline" />) and weight (<img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20W%3D2"
+alt="W=2" title="W=2" class="math inline" />) values were used for all
+agents in the system (in addition, as before, <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20P_%7BOOT%7D%20%3D%200.01"
+alt="P_{OOT} = 0.01" title="P_{OOT} = 0.01" class="math inline" />, <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20r%3D3"
+alt="r=3" title="r=3" class="math inline" />). The result is the
+formation of an integrated neighborhood in the vicinity of the
+attraction, with large segregated domains at the outskirts. The
+distribution shown is the result of <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%2015000L%5E2"
+alt="15000L^2" title="15000L^2" class="math inline" /> moves (an extra
+long run to ensure that this was, indeed, a stable
+solution).</figcaption>
+</figure>
+<p>Fig. <a href="#fig:1attract" data-reference-type="ref"
+data-reference="fig:1attract">4</a> shows the results of this
+modification. Even with all members of the population given the same
+weighting and the same temperature, we obtain the results we
+desired–around the attraction, we have dense integration, while away
+from it, we have large segregated domains.</p>
+<p>This solution is interesting, as it doesn’t even come close to
+minimizing the energy of the system (the solution for energy
+minimization, by the way, is independent of the external potential,
+since all agents have the same weighting term). This can be explained by
+the fact that each agent is “greedy"–it doesn’t care about minimizing
+the energy of the whole system, only about minimizing its own energy.
+Consider an agent in the center of one of the outlying segregated
+regions. For the sake of argument, say all <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%2028" alt="28"
+title="28" class="math inline" /> of its neighbors are of the same
+color. Now say it has the opportunity to move to a vacancy <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%2022" alt="22"
+title="22" class="math inline" /> sites closer to the attraction. Even
+if none of the <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%2028" alt="28"
+title="28" class="math inline" /> sites in the neighborhood of this
+vacancy are of the agent’s type, it will always move to this new site,
+even though it <em>increases</em> the overall energy of the system.
+Thus, any self-segregation that may occur near the attraction due to
+moves of agents already near the attraction will be undone by the influx
+of opportunistic agents moving near to the attraction from faraway.</p>
+<h2 id="subsec:2attract">Multiple Attractions</h2>
+<p>We now consider the case of multiple attractions, which can be
+handled in two ways. If each attractor is a necessity to all the agents
+in the system (for example, if one attractor is a grocery store and the
+other a shopping center), we can think of the potential of the system as
+a superposition of the potentials due to each attraction: <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Cdisplaystyle%20%5Clabel%7Beqn%3AsumV%7DV%28x%29%3D%5Csum_%5Calpha%5Cleft%5Bdist%28x%2Ca_%5Calpha%29%5Cright%5D%5E1"
+alt="\label{eqn:sumV}V(x)=\sum_\alpha\left[dist(x,a_\alpha)\right]^1"
+title="\label{eqn:sumV}V(x)=\sum_\alpha\left[dist(x,a_\alpha)\right]^1"
+class="math display" /></p>
+<p>On the other hand, if both attractions serve the same purpose (for
+example, if both are train stations), then all an agent will care about
+is which attraction is closer, in other words, the potential will be
+determined by the minimum distance to one of the attractions: <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Cdisplaystyle%20%5Clabel%7Beqn%3AminV%7DV%28x%29%3D%5Ctext%7Bmin%7D%5Cleft%5C%7B%5Cleft%5Bdist%28x%2Ca_%5Calpha%29%5Cright%5D%5E1%5Cright%5C%7D"
+alt="\label{eqn:minV}V(x)=\text{min}\left\{\left[dist(x,a_\alpha)\right]^1\right\}"
+title="\label{eqn:minV}V(x)=\text{min}\left\{\left[dist(x,a_\alpha)\right]^1\right\}"
+class="math display" /></p>
+<h3 id="subsubsec:sum">Superposition</h3>
+<p>In the case of two superimposed <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20r%5E1"
+alt="r^1" title="r^1" class="math inline" /> potentials, the ideal
+location, potential-wise, will be anywhere along the line connecting the
+two attractions. Indeed, the combined potential in this case will be
+stadium-shaped, with a much larger area where the potential isn’t as
+steep. Consequently, one might expect our model to segregate more
+readily, but as Fig. <a href="#fig:sum" data-reference-type="ref"
+data-reference="fig:sum">5</a> shows, this is not the case. Instead, the
+entire “low-potential" region is integrated, while the boundaries are
+segregated.</p>
+<figure id="fig:sum">
+<p><img src="sum.png" alt="image" /> <img src="sum-V.png"
+alt="image" /></p>
+<figcaption><span id="fig:sum" label="fig:sum"></span>Long-time race
+distribution (left) for a simulated <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20200%5Ctimes%20200"
+alt="200\times 200" title="200\times 200" class="math inline" />-site
+(<img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20L%3D200"
+alt="L=200" title="L=200" class="math inline" />) city with two races
+and two sites imposing superimposed attractive <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20r%5E1"
+alt="r^1" title="r^1" class="math inline" /> potentials (right) (darker
+color, higher potential). The same temperature (<img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T%3D5"
+alt="T=5" title="T=5" class="math inline" />) and weight (<img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20W%3D1"
+alt="W=1" title="W=1" class="math inline" />) values were used for all
+agents in the system (in addition, as before, <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20P_%7BOOT%7D%20%3D%200.01"
+alt="P_{OOT} = 0.01" title="P_{OOT} = 0.01" class="math inline" />, <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20r%3D3"
+alt="r=3" title="r=3" class="math inline" />). The result is still that
+integration dominates in the low-potential regions, while segregation is
+only seen in high-potential regions. The distribution shown is the
+result of <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%201000L%5E2"
+alt="1000L^2" title="1000L^2" class="math inline" /> moves.</figcaption>
+</figure>
+<h3 id="subsubsec:min">Minimum</h3>
+<p>In the case of minimal-value potentials, we would absolutely expect a
+segregated solution, as each race could “lay claim" to its own
+attraction. Instead, as Fig. <a href="#fig:min"
+data-reference-type="ref" data-reference="fig:min">6</a> shows, the
+result is the same as before–integration near the attractions,
+segregation far away, where the potential is higher.</p>
+<figure id="fig:min">
+<p><img src="min.png" alt="image" /> <img src="min-V.png"
+alt="image" /></p>
+<figcaption><span id="fig:min" label="fig:min"></span>Long-time race
+distribution (left) for a simulated <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20200%5Ctimes%20200"
+alt="200\times 200" title="200\times 200" class="math inline" />-site
+(<img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20L%3D200"
+alt="L=200" title="L=200" class="math inline" />) city with two races
+and two sites imposing attractive <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20r%5E1"
+alt="r^1" title="r^1" class="math inline" /> potentials (the potential
+at any given site is the minimum of the potential due to each
+attraction) (right) (darker color, higher potential). The same
+temperature (<img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T%3D5"
+alt="T=5" title="T=5" class="math inline" />) and weight (<img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20W%3D1"
+alt="W=1" title="W=1" class="math inline" />) values were used for all
+agents in the system (in addition, as before, <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20P_%7BOOT%7D%20%3D%200.01"
+alt="P_{OOT} = 0.01" title="P_{OOT} = 0.01" class="math inline" />, <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20r%3D3"
+alt="r=3" title="r=3" class="math inline" />). The result is the
+formation of an integrated neighborhood in the vicinities of the
+attractions (the low-potential regions), with large segregated domains
+in the high-potential areas. The distribution shown is the result of
+<img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%201500L%5E2"
+alt="1500L^2" title="1500L^2" class="math inline" /> moves.</figcaption>
+</figure>
+<h1 id="sec:conclusion">Preliminary Conclusions &amp; Further
+Investigations</h1>
+<p>In seeking to replicate the phenomenon of segregated and integrated
+domains coexisting in the same system, we have shown that such behavior
+may arise from a universal rule set, that is, it is not necessary for
+individuals in the system to have different decision-making processes;
+individuals living in integrated urban centers need not be more tolerant
+or cosmopolitan or career-oriented than their suburban segregated
+compatriots. Similarly, those choosing to live in the segregated suburbs
+need not be more bigoted than their integrated counterparts. Our results
+suggest that integration can spontaneously arise in systems just by
+creating destinations that appeal to all demographics. As each
+individual acts in their own best interests, the system as a whole
+diverges away from any lowest-energy (segregated) configuration.</p>
+<p>Our model, of course, is overly simplistic–it does not take into
+account property costs, nor differences between individuals, be they
+economic or social. The “ultimate seller’s market" scheme we use may
+also contribute to our results, and may help explain why we do not see
+segregation re-emerge, even in multi-attraction systems. Further
+investigations would study the effect of multiple vacancies, where each
+agent would have a choice of where to move, beyond the choice of whether
+or not to move at all. We would also like to investigate more
+sophisticated energy matrices, that is, if the racial preferences are
+unequal (say, Red prefers not to be around Blues more than Blue prefers
+not to be around Reds, or Red prefers living near Greens than
+Blues).</p>
+<p>We would also like to investigate phenomena such as repulsive
+potentials (say, due to a garbage dump or a high-crime area, which would
+probably be of a form other than <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20r%5E1"
+alt="r^1" title="r^1" class="math inline" />), potentials with hard
+cut-offs, and regular or irregular potential lattices. It would also be
+interesting to investigate real-world topologies (taking into account
+uninhabitable zones such as rivers, parks or dense forests). For
+example, the ethnic divide to the south of Downtown Silver Spring
+happens to fall along Rock Creek Park. We would hope that our model
+would reproduce such phenomena.</p>
+<p>We allude at several points to the fact that the integrated solutions
+are non-ideal, energetically. It is important to point out that our
+simulations are all initialized to a random (integrated) configuration,
+far from these “ideal" configurations. Continued research would of
+course require some trials with the system initialized to one of these
+lowest-energy configurations to see whether integration arises even
+under those conditions, or whether the phenomena we have seen so far has
+merely been the suppression of the formation of segregated domains.</p>
+<p>Finally, all the results we present here have been qualitative–we
+differentiate between segregation and integration based on how the
+system <em>looks</em> rather than by using any mathematical measure. For
+example, the total energy of the system, as defined by <img
+style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Cdisplaystyle%20%5Clabel%7Beqn%3AEtotal%7DE%5E%5Ctext%7Btot%7D%3D%5Csum_iE%5Ei"
+alt="\label{eqn:Etotal}E^\text{tot}=\sum_iE^i"
+title="\label{eqn:Etotal}E^\text{tot}=\sum_iE^i" class="math display" />
+would no-doubt prove a useful measure, especially if we compared it to
+the minimum such value possible (a large departure from the minimum
+energy would be indicative of integration). This measure would serve as
+an order parameter to allow us to study phase transitions in the system
+with respect to the tuning parameters <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20T" alt="T"
+title="T" class="math inline" /> and <img style="vertical-align:middle"
+src="https://latex.codecogs.com/png.latex?%5Ctextstyle%20W" alt="W"
+title="W" class="math inline" />, which were chosen in the above
+simulations strictly for the purposes of clear demonstration. This would
+allow for a far more rigorous treatment of the material than we have
+performed so far. Furthermore, we believe it might be possible to
+analytically derive some properties of the equilibrium conditions, for
+example, in the single-attractor case, the radius of the integrated
+neighborhood (we suspect, but have not yet attempted to verify, that
+this condition is that the expectation value for the energy–both
+potential and racial–of an agent at the edge must be equal to either the
+energy of the most remote agent or the average energy of all outlying
+agents). These types of analysis would not only strengthen our results,
+but our methods might prove applicable to other related systems.</p>
+</body>
+</html>
